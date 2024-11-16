@@ -8,6 +8,7 @@ app.use(express.json()); // For parsing JSON request bodies
 
 // CREATE a new user
 app.post('/users', async (req, res) => {
+  console.log(req.body)
   const { name, email } = req.body;
   try {
     const newUser = await pool.query(
@@ -23,20 +24,29 @@ app.post('/users', async (req, res) => {
 
 // READ all users
 app.get('/users', async (req, res) => {
-  const { name } = req.query;
   try {
-    if (name) {
-      const user = await pool.query('SELECT * FROM users WHERE name = $1', [name]);
-      res.json(user.rows[0] || { message: 'User not found' });
-    } else {
-      const allUsers = await pool.query('SELECT * FROM users');
-      res.json(allUsers.rows);
-    }
+    const allUsers = await pool.query('SELECT * FROM users');
+    res.json(allUsers.rows);
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ message: 'Error fetching users' });
   }
 });
+
+app.post('/search', async (req, res) => {
+
+  const { name } = req.body;
+  console.log(req.body)
+  console.log(name)
+
+  try{
+    const user = await pool.query('SELECT * FROM users WHERE name = $1', [name]);
+    res.json(user.rows[0] || { message: 'User not found' });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: 'Error fetching users' });
+  }
+})
 
 // READ a single user by ID
 app.get('/users/:id', async (req, res) => {
